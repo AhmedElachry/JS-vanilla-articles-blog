@@ -4,10 +4,16 @@ let $title = document.querySelector("[name='title']");
 let $article = document.querySelector("[name='article']");
 let $author = document.querySelector("[name='author']");
 let $publishBtn = document.querySelector("[type='submit']");
+let $resetBlog = document.querySelector(".reset-blog");
 let $articlesContainer = document.querySelector(".articles");
+
 let articles = [];
 
 getFromLocalStorage();
+
+$resetBlog.onclick = () => {
+  window.localStorage.clear();
+};
 
 function isValidArticle(ti, ar, au) {
   $publishBtn.addEventListener("click", function (e) {
