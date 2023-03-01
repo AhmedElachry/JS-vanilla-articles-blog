@@ -1,3 +1,7 @@
+// CONSTANTS.js
+
+let ARTICLES_STORAGE_KEY = "articlesData"; // 'articles'
+
 let $form = document.querySelector(".article-addition");
 let $warning = document.querySelector(".warning");
 let $title = document.querySelector("[name='title']");
@@ -22,9 +26,15 @@ renderArticles(articles);
 
 $publishBtn.addEventListener("click", function (e) {
   e.preventDefault();
-  articleValidation($title, $article, $author);
+  // articleValidation($title, $article, $author);
+  if(isValidArticle($title, $article, $author)) {
+    addArticle($title.value, $article.value, $author.value);
+  } else {
+    // display the error msaage
+  }
 });
 
+// validate article 
 function articleValidation(ti, ar, au) {
   if ($title.value === "" || $article.value === "" || $author.value === "") {
     $warning.innerHTML = "please fill out all fields";
@@ -34,13 +44,21 @@ function articleValidation(ti, ar, au) {
   }
 }
 
+function isValidArticle(ti, ar, au) {
+  if ($title.value === "" || $article.value === "" || $author.value === "") {
+    return false;
+  } 
+  return true;
+}
+
+
 function addArticle(ti, ar, au) {
   let newArticle = {
     id: crypto.randomUUID(),
     title: ti,
     article: ar,
     author: au,
-    writtenDate: new Date().toLocaleString(),
+    writtenDate: new Date().toLocaleString(), // publishedAt || createdAt
   };
   articles.push(newArticle);
   $form.reset();
@@ -67,11 +85,12 @@ function renderArticles(articles) {
 }
 
 function addToLocalStorage(articles) {
-  localStorage.setItem("articlesData", JSON.stringify(articles));
+  // define a constant ARTICLES_STORAGE_KEY = "articlesData"
+  localStorage.setItem(ARTICLES_STORAGE_KEY, JSON.stringify(articles));
 }
 function getFromLocalStorage() {
-  if (localStorage.getItem("articlesData")) {
-    articles = JSON.parse(localStorage.getItem("articlesData"));
+  if (localStorage.getItem(ARTICLES_STORAGE_KEY)) {
+    articles = JSON.parse(localStorage.getItem(ARTICLES_STORAGE_KEY));
   }
 }
 
@@ -83,6 +102,19 @@ function resetTheBlog() {
 
 $articlesContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("del")) {
+    
+    createDialog({
+      title: 'Are ...',
+      body: '',
+      footer: {
+        doneBtn: '',
+        cancelBtn: '',
+      },
+      onDone: () => {
+        deleteArticle(1244);
+      }
+    });
+    
     $delModal.style.display = "block";
   }
   deleteHandler(
@@ -92,6 +124,7 @@ $articlesContainer.addEventListener("click", (e) => {
 });
 
 function deleteHandler(arId, arHolder) {
+  // this produces a bug
   $yesBtn.addEventListener("click", () => {
     deleteArticle(arId, arHolder);
     $delModal.style.display = "none";
@@ -120,6 +153,20 @@ $articlesContainer.addEventListener("click", (e) => {
 
 $articlesContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("edit")) {
+
+    createDialog({
+      title: 'Update art,,,,',
+      body: '<form ....>',
+      footer: {
+        doneBtn: '',
+        cancelBtn: '',
+      },
+      onDone: () => {
+        updateArticle(12);
+      },
+      onCancel: () => {}
+    });
+
     $editModal.style.display = "block";
     editHandler(e.target.parentElement.getAttribute("data-id"));
   }
