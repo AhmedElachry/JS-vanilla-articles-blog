@@ -5,10 +5,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Articles</title>
+    <link rel="stylesheet" href="main.css" />
   </head>
   <body>
     <h1>welcome to our blog</h1>
-    <form action="">
+    <form action="" method="get" class="article-addition">
       <p class="warning"></p>
       <input
         type="text"
@@ -33,6 +34,34 @@
       <button class="reset-blog">reset the blog</button>
     </form>
     <div class="articles"></div>
+    <div class="delete-modal">
+      <div class="delete-modal-content">
+        <p>are you sure about deleting this article ?</p>
+        <div class="delete-btns">
+          <span class="yes-btn">yes</span>
+          <span class="cancel-del-btn">cancel</span>
+        </div>
+      </div>
+    </div>
+    <div class="edit-modal">
+      <div class="edit-modal-content">
+        <form action="" method="get" class="article-edit">
+          <input type="text" name="edit-title" style="display: block" />
+          <textarea
+            name="edit-article"
+            id=""
+            cols="30"
+            rows="10"
+            style="display: block"
+          ></textarea>
+        </form>
+        <p>after editing your article click done to save</p>
+        <div class="edit-btns">
+          <span class="done-btn">done</span>
+          <span class="cancel-edit-btn">cancel</span>
+        </div>
+      </div>
+    </div>
     <script src="./js/main.js"></script>
   </body>
 </html>
