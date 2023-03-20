@@ -1,3 +1,5 @@
+import editHandler from "./modal.js";
+import articlesStorageKey from "./constants.js";
 let $form = document.querySelector(".article-addition");
 let $warning = document.querySelector(".warning");
 let $title = document.querySelector("[name='title']");
@@ -9,11 +11,6 @@ let $articlesContainer = document.querySelector(".articles");
 let $delModal = document.querySelector(".delete-modal");
 let $yesBtn = document.querySelector(".yes-btn");
 let $cancelDelBtn = document.querySelector(".cancel-del-btn");
-let $editModal = document.querySelector(".edit-modal");
-let $doneBtn = document.querySelector(".done-btn");
-let $cancelEditBtn = document.querySelector(".cancel-edit-btn");
-let $editTitle = document.querySelector("[name='edit-title']");
-let $editArticle = document.querySelector("[name='edit-article']");
 
 let articles = [];
 
@@ -22,16 +19,18 @@ renderArticles(articles);
 
 $publishBtn.addEventListener("click", function (e) {
   e.preventDefault();
-  articleValidation($title, $article, $author);
+  if (isValidArticle($title, $article, $author)) {
+    addArticle($title.value, $article.value, $author.value);
+  } else {
+    $warning.innerHTML = "please fill out all fields";
+  }
 });
 
-function articleValidation(ti, ar, au) {
+function isValidArticle(ti, ar, au) {
   if ($title.value === "" || $article.value === "" || $author.value === "") {
-    $warning.innerHTML = "please fill out all fields";
-  } else {
-    $warning.innerHTML = "";
-    addArticle($title.value, $article.value, $author.value);
+    return false;
   }
+  return true;
 }
 
 function addArticle(ti, ar, au) {
@@ -40,7 +39,7 @@ function addArticle(ti, ar, au) {
     title: ti,
     article: ar,
     author: au,
-    writtenDate: new Date().toLocaleString(),
+    publishAt: new Date().toLocaleString(),
   };
   articles.push(newArticle);
   $form.reset();
@@ -58,7 +57,7 @@ function renderArticles(articles) {
     <p>${ar.title} </p>
     <p>${ar.article} </p>
     <p>${ar.author} </p>
-    <p>publish date: ${ar.writtenDate} </p>
+    <p>publish date: ${ar.publishAt} </p>
     <button class="edit" data-id=${ar.id}> edit</button>
     <button class="del" data-id=${ar.id}> delete</button>
     `;
@@ -67,19 +66,19 @@ function renderArticles(articles) {
 }
 
 function addToLocalStorage(articles) {
-  localStorage.setItem("articlesData", JSON.stringify(articles));
+  localStorage.setItem(articlesStorageKey, JSON.stringify(articles));
 }
 function getFromLocalStorage() {
-  if (localStorage.getItem("articlesData")) {
-    articles = JSON.parse(localStorage.getItem("articlesData"));
+  if (localStorage.getItem(articlesStorageKey)) {
+    articles = JSON.parse(localStorage.getItem(articlesStorageKey));
   }
 }
 
-$resetBlog.onclick = () => resetTheBlog();
-
-function resetTheBlog() {
-  window.localStorage.removeItem("articlesData");
-}
+$resetBlog.addEventListener("click", function (e) {
+  window.localStorage.removeItem(articlesStorageKey);
+  $articlesContainer.innerHTML = "";
+  articles = [];
+});
 
 $articlesContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("del")) {
@@ -96,10 +95,12 @@ function deleteHandler(arId, arHolder) {
     deleteArticle(arId, arHolder);
     $delModal.style.display = "none";
   });
-  $cancelDelBtn.addEventListener(
-    "click",
-    () => ($delModal.style.display = "none")
-  );
+  $cancelDelBtn.addEventListener("click", () => {
+    $delModal.style.display = "none";
+    // my simple solution for deleting bug
+    arId = "";
+    renderArticles(articles);
+  });
 }
 
 function deleteArticle(arId, arHolder) {
@@ -120,40 +121,14 @@ $articlesContainer.addEventListener("click", (e) => {
 
 $articlesContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("edit")) {
-    $editModal.style.display = "block";
-    editHandler(e.target.parentElement.getAttribute("data-id"));
+    edit(e.target.parentElement.getAttribute("data-id"));
   }
 });
-
-function editHandler(arId) {
-  getArValuesToInputs(arId);
-  editDone(arId);
-  $cancelEditBtn.addEventListener("click", () => {
-    $editModal.style.display = "none";
-  });
-}
-
-function getArValuesToInputs(arId) {
-  articles.map((el) => {
-    if (el.id == arId) {
-      $editTitle.value = el.title;
-      $editArticle.value = el.article;
+function edit(arId) {
+  articles.map((ar) => {
+    if (ar.id == arId) {
+      editHandler(ar, arId, articles, addToLocalStorage, renderArticles);
     }
-    return el;
-  });
-}
-
-function editDone(arId) {
-  $doneBtn.addEventListener("click", () => {
-    articles = articles.map((el) => {
-      if (el.id == arId) {
-        el.title = $editTitle.value;
-        el.article = $editArticle.value;
-      }
-      addToLocalStorage(articles);
-      renderArticles(articles);
-      $editModal.style.display = "none";
-      return el;
-    });
+    return ar;
   });
 }

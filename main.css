@@ -23,17 +23,33 @@
   transform: translate(-50%, -50%);
 }
 .delete-modal-content p,
-.edit-modal-content p {
-  font-size: 2rem;
-  padding: 20px;
+.modal-dialog p {
+  font-size: 1.5rem;
+  padding: 5px;
+  padding-left: 20px;
+  width: 550px;
+  margin: 20px;
 }
-.delete-modal-content .delete-btns,
-.edit-modal-content .edit-btns {
+.modal-dialog input,
+.modal-dialog textarea {
+  width: 300px;
+  display: block;
+  border-width: 1px;
+  margin-left: 50px;
+}
+.modal-dialog textarea {
+  height: 200px;
+  margin-top: 30px;
+}
+.modal-dialog button {
+  padding: 10px;
+  margin: 50px;
+}
+.delete-modal-content .delete-btns {
   display: flex;
   justify-content: space-evenly;
 }
-.delete-modal-content span,
-.edit-modal-content span {
+.delete-modal-content span {
   background-color: #ccc;
   font-size: 1.2rem;
   padding: 5px;
@@ -43,12 +59,11 @@
   margin: 10px;
 }
 .delete-modal-content span:hover,
-.edit-modal-content span:hover {
+.modal-dialog button:hover {
   cursor: pointer;
   background-color: #ddd;
 }
-.edit-modal {
-  display: none;
+.modal-background {
   position: fixed;
   z-index: 1;
   width: 100%;
@@ -59,9 +74,9 @@
   top: 50%;
   transform: translate(-50%, -50%);
 }
-.edit-modal-content {
+.modal-dialog {
   max-width: 1000px;
-  max-height: 600px;
+  max-height: 6000px;
   background-color: aliceblue;
   position: fixed;
   left: 50%;

@@ -9,7 +9,7 @@
   </head>
   <body>
     <h1>welcome to our blog</h1>
-    <form action="" method="get" class="article-addition">
+    <form action="" method="post" class="article-addition">
       <p class="warning"></p>
       <input
         type="text"
@@ -31,7 +31,7 @@
         style="display: block"
       />
       <button type="submit">publish</button>
-      <button class="reset-blog">reset the blog</button>
+      <button type="button" class="reset-blog" >reset the blog</button>
     </form>
     <div class="articles"></div>
     <div class="delete-modal">
@@ -43,25 +43,9 @@
         </div>
       </div>
     </div>
-    <div class="edit-modal">
-      <div class="edit-modal-content">
-        <form action="" method="get" class="article-edit">
-          <input type="text" name="edit-title" style="display: block" />
-          <textarea
-            name="edit-article"
-            id=""
-            cols="30"
-            rows="10"
-            style="display: block"
-          ></textarea>
-        </form>
-        <p>after editing your article click done to save</p>
-        <div class="edit-btns">
-          <span class="done-btn">done</span>
-          <span class="cancel-edit-btn">cancel</span>
-        </div>
-      </div>
     </div>
-    <script src="./js/main.js"></script>
+    <script src="./js/main.js" type="module"></script>
+    <script src="./js/modal.js" type="module"></script>
+    <script src="./js/constants.js" type="module"></script>
   </body>
 </html>
