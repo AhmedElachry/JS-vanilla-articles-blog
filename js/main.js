@@ -1,5 +1,7 @@
-import editHandler from "./modal.js";
-import articlesStorageKey from "./constants.js";
+import EditingModal from "./editingModal.js";
+import DeletingModal from "./deletingModal.js";
+import ARTICLES_STORAGE_KEY from "./constants.js";
+
 let $form = document.querySelector(".article-addition");
 let $warning = document.querySelector(".warning");
 let $title = document.querySelector("[name='title']");
@@ -8,16 +10,13 @@ let $author = document.querySelector("[name='author']");
 let $publishBtn = document.querySelector("[type='submit']");
 let $resetBlog = document.querySelector(".reset-blog");
 let $articlesContainer = document.querySelector(".articles");
-let $delModal = document.querySelector(".delete-modal");
-let $yesBtn = document.querySelector(".yes-btn");
-let $cancelDelBtn = document.querySelector(".cancel-del-btn");
 
 let articles = [];
 
 getFromLocalStorage();
 renderArticles(articles);
 
-$publishBtn.addEventListener("click", function (e) {
+$publishBtn.addEventListener("click", (e) => {
   e.preventDefault();
   if (isValidArticle($title, $article, $author)) {
     addArticle($title.value, $article.value, $author.value);
@@ -26,20 +25,17 @@ $publishBtn.addEventListener("click", function (e) {
   }
 });
 
-function isValidArticle(ti, ar, au) {
-  if ($title.value === "" || $article.value === "" || $author.value === "") {
-    return false;
-  }
-  return true;
+function isValidArticle(title, content, author) {
+  return title.value !== "" && content.value !== "" && author.value !== "";
 }
 
-function addArticle(ti, ar, au) {
+function addArticle(title, content, author) {
   let newArticle = {
     id: crypto.randomUUID(),
-    title: ti,
-    article: ar,
-    author: au,
-    publishAt: new Date().toLocaleString(),
+    title,
+    content,
+    author,
+    publishedAt: new Date().toLocaleString(),
   };
   articles.push(newArticle);
   $form.reset();
@@ -49,86 +45,86 @@ function addArticle(ti, ar, au) {
 
 function renderArticles(articles) {
   $articlesContainer.innerHTML = "";
-  articles.forEach(function (ar) {
-    let articleContainer = document.createElement("div");
+  articles.forEach((article) => {
+    const { id, title, content, author, publishedAt } = article;
+    const articleContainer = document.createElement("div");
     articleContainer.setAttribute("class", "article");
-    articleContainer.setAttribute("data-id", ar.id);
+    articleContainer.setAttribute("data-id", id);
     articleContainer.innerHTML = `
-    <p>${ar.title} </p>
-    <p>${ar.article} </p>
-    <p>${ar.author} </p>
-    <p>publish date: ${ar.publishAt} </p>
-    <button class="edit" data-id=${ar.id}> edit</button>
-    <button class="del" data-id=${ar.id}> delete</button>
+      <p>${title}</p>
+      <p>${content}</p>
+      <p>${author}</p>
+      <p>Publish date: ${publishedAt}</p>
+      <button class="edit" data-id=${id}>Edit</button>
+      <button class="del" data-id=${id}>Delete</button>
     `;
     $articlesContainer.appendChild(articleContainer);
   });
 }
 
 function addToLocalStorage(articles) {
-  localStorage.setItem(articlesStorageKey, JSON.stringify(articles));
+  localStorage.setItem(ARTICLES_STORAGE_KEY, JSON.stringify(articles));
 }
+
 function getFromLocalStorage() {
-  if (localStorage.getItem(articlesStorageKey)) {
-    articles = JSON.parse(localStorage.getItem(articlesStorageKey));
+  const storedArticles = localStorage.getItem(ARTICLES_STORAGE_KEY);
+  if (storedArticles) {
+    articles = JSON.parse(storedArticles);
   }
 }
 
-$resetBlog.addEventListener("click", function (e) {
-  window.localStorage.removeItem(articlesStorageKey);
+$resetBlog.addEventListener("click", (e) => {
+  window.localStorage.removeItem(ARTICLES_STORAGE_KEY);
   $articlesContainer.innerHTML = "";
   articles = [];
 });
 
 $articlesContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("del")) {
-    $delModal.style.display = "block";
+    onDeleteClick(
+      e.target.parentElement.getAttribute("data-id"),
+      e.target.parentElement
+    );
   }
-  deleteHandler(
-    e.target.parentElement.getAttribute("data-id"),
-    e.target.parentElement
-  );
 });
 
-function deleteHandler(arId, arHolder) {
-  $yesBtn.addEventListener("click", () => {
-    deleteArticle(arId, arHolder);
-    $delModal.style.display = "none";
-  });
-  $cancelDelBtn.addEventListener("click", () => {
-    $delModal.style.display = "none";
-    // my simple solution for deleting bug
-    arId = "";
-    renderArticles(articles);
-  });
-}
-
-function deleteArticle(arId, arHolder) {
-  articles = articles.filter((ar) => ar.id != arId);
-  arHolder.remove();
-  addToLocalStorage(articles);
-}
-
-$articlesContainer.addEventListener("click", (e) => {
-  if (e.target.classList.contains("del")) {
-    $delModal.style.display = "block";
-  }
-  deleteHandler(
-    e.target.parentElement.getAttribute("data-id"),
-    e.target.parentElement
+function onDeleteClick(articleId, articleHolder) {
+  const modal = new DeletingModal(
+    "Are you sure about deleting this article?",
+    () => {
+      articles = articles.filter((article) => article.id !== articleId);
+      articleHolder.remove();
+      addToLocalStorage(articles);
+    },
+    () => {
+      modal.close();
+    }
   );
-});
+  modal.openDeletingModal();
+}
 
 $articlesContainer.addEventListener("click", (e) => {
   if (e.target.classList.contains("edit")) {
-    edit(e.target.parentElement.getAttribute("data-id"));
+    const articleId = e.target.parentElement.getAttribute("data-id");
+    const articleToEdit = articles.find((article) => article.id === articleId);
+    onEditClick(articleToEdit);
   }
 });
-function edit(arId) {
-  articles.map((ar) => {
-    if (ar.id == arId) {
-      editHandler(ar, arId, articles, addToLocalStorage, renderArticles);
+
+function onEditClick(articleToEdit) {
+  const modal = new EditingModal(
+    "Click Done after editing your article",
+    articleToEdit.title,
+    articleToEdit.content,
+    (titleValue, contentValue) => {
+      articleToEdit.title = titleValue;
+      articleToEdit.content = contentValue;
+      addToLocalStorage(articles);
+      renderArticles(articles);
+    },
+    () => {
+      modal.close();
     }
-    return ar;
-  });
+  );
+  modal.openEditingModal();
 }
